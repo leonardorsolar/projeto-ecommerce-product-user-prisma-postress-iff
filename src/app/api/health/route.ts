@@ -1,14 +1,15 @@
 import { NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { checkDatabaseConnection } from '@/lib/databaseHealth'
+import { getDatabaseProvider } from '@/lib/databaseProvider'
 
 export async function GET() {
   try {
-    const db = getDb()
-    db.prepare('SELECT 1').get()
+    await checkDatabaseConnection()
 
     return NextResponse.json({
       status: 'ok',
       database: 'connected',
+      provider: getDatabaseProvider(),
       timestamp: new Date().toISOString(),
     })
   } catch (error) {

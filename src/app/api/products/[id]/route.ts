@@ -11,7 +11,7 @@ interface Params {
 export async function GET(_: NextRequest, { params }: Params) {
   try {
     const { id } = await params
-    const product = productService.findById(Number(id))
+    const product = await productService.findById(Number(id))
     return ok(product)
   } catch (error) {
     if (error instanceof NotFoundError) return notFound(error.message)
@@ -23,7 +23,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
   try {
     const { id } = await params
     const body = await request.json()
-    const product = productService.update(Number(id), body)
+    const product = await productService.update(Number(id), body)
     return ok(product)
   } catch (error) {
     if (error instanceof NotFoundError) return notFound(error.message)
@@ -35,7 +35,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 export async function DELETE(_: NextRequest, { params }: Params) {
   try {
     const { id } = await params
-    productService.delete(Number(id))
+    await productService.delete(Number(id))
     return ok({ message: 'Produto deletado com sucesso' })
   } catch (error) {
     if (error instanceof NotFoundError) return notFound(error.message)

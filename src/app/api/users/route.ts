@@ -4,7 +4,7 @@ import { userService, ValidationError } from '@/modules/users/services/userServi
 
 export async function GET() {
   try {
-    const users = userService.findAll()
+    const users = await userService.findAll()
     console.log('Fetched users:', users)
     return ok(users)
   } catch (error) {
@@ -16,7 +16,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const user = userService.create(body)
+    const user = await userService.create(body)
     return created(user)
   } catch (error) {
     if (error instanceof ValidationError) {

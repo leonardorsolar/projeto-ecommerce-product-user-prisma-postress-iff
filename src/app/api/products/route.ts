@@ -6,7 +6,7 @@ import { ok, created, badRequest, serverError } from '@/lib/apiResponse'
 
 export async function GET() {
   try {
-    const products = productService.findAll()
+    const products = await productService.findAll()
     return ok(products)
   } catch (error) {
     console.error('[GET /api/products]', error)
@@ -17,7 +17,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const product = productService.create(body)
+    const product = await productService.create(body)
     return created(product)
   } catch (error) {
     if (error instanceof ValidationError) {

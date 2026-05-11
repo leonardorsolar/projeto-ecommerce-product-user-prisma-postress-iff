@@ -22,18 +22,18 @@ export class NotFoundError extends Error {
 }
 
 export const productService = {
-  findAll(): Product[] {
+  async findAll(): Promise<Product[]> {
     console.info('[ProductService] Buscando todos os produtos')
-    return productRepository.findAll()
+    return await productRepository.findAll()
   },
 
-  findById(id: number): Product {
-    const product = productRepository.findById(id)
+  async findById(id: number): Promise<Product> {
+    const product = await productRepository.findById(id)
     if (!product) throw new NotFoundError(id)
     return product
   },
 
-  create(data: CreateProductDTO): Product {
+  async create(data: CreateProductDTO): Promise<Product> {
     if (!data.name || data.name.trim() === '') {
       throw new ValidationError('INVALID_DATA', 'Nome é obrigatório', 'O campo name não pode ser vazio')
     }
@@ -45,13 +45,13 @@ export const productService = {
     }
 
     console.info('[ProductService] Criando produto:', { name: data.name, price: data.price })
-    return productRepository.create({
+    return await productRepository.create({
       ...data,
       name: data.name.trim(),
     })
   },
 
-  update(id: number, data: UpdateProductDTO): Product {
+  async update(id: number, data: UpdateProductDTO): Promise<Product> {
     if (data.name !== undefined && data.name.trim() === '') {
       throw new ValidationError('INVALID_DATA', 'Nome não pode ser vazio')
     }
@@ -62,15 +62,15 @@ export const productService = {
       throw new ValidationError('NEGATIVE_STOCK', 'Estoque não pode ser negativo')
     }
 
-    const updated = productRepository.update(id, data)
+    const updated = await productRepository.update(id, data)
     if (!updated) throw new NotFoundError(id)
 
     console.info('[ProductService] Produto atualizado:', { id })
     return updated
   },
 
-  delete(id: number): void {
-    const deleted = productRepository.delete(id)
+  async delete(id: number): Promise<void> {
+    const deleted = await productRepository.delete(id)
     if (!deleted) throw new NotFoundError(id)
     console.info('[ProductService] Produto deletado:', { id })
   },

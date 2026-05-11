@@ -26,17 +26,17 @@ function validateRole(role: string): role is UserRole {
 }
 
 export const userService = {
-  findAll(): User[] {
-    return userRepository.findAll()
+  async findAll(): Promise<User[]> {
+    return await userRepository.findAll()
   },
 
-  findById(id: number): User {
-    const user = userRepository.findById(id)
+  async findById(id: number): Promise<User> {
+    const user = await userRepository.findById(id)
     if (!user) throw new NotFoundError(id)
     return user
   },
 
-  create(data: CreateUserDTO): User {
+  async create(data: CreateUserDTO): Promise<User> {
     if (!data.name || data.name.trim() === '') {
       throw new ValidationError('INVALID_DATA', 'Nome é obrigatório', 'O campo name não pode ser vazio')
     }
@@ -58,11 +58,11 @@ export const userService = {
       throw new ValidationError('INVALID_ROLE', 'Role inválida. Use admin ou user')
     }
 
-    if (userRepository.emailExists(normalizedEmail)) {
+    if (await userRepository.emailExists(normalizedEmail)) {
       throw new ValidationError('EMAIL_ALREADY_EXISTS', 'Já existe um usuário com este email')
     }
 
-    return userRepository.create({
+    return await userRepository.create({
       ...data,
       name: data.name.trim(),
       email: normalizedEmail,
@@ -71,7 +71,7 @@ export const userService = {
     })
   },
 
-  update(id: number, data: UpdateUserDTO): User {
+  async update(id: number, data: UpdateUserDTO): Promise<User> {
     if (data.name !== undefined && data.name.trim() === '') {
       throw new ValidationError('INVALID_DATA', 'Nome não pode ser vazio')
     }
@@ -86,7 +86,7 @@ export const userService = {
         throw new ValidationError('INVALID_EMAIL', 'Email inválido')
       }
 
-      if (userRepository.emailExists(normalizedEmail, id)) {
+      if (await userRepository.emailExists(normalizedEmail, id)) {
         throw new ValidationError('EMAIL_ALREADY_EXISTS', 'Já existe um usuário com este email')
       }
 
@@ -105,7 +105,7 @@ export const userService = {
       throw new ValidationError('INVALID_ROLE', 'Role inválida. Use admin ou user')
     }
 
-    const updated = userRepository.update(id, {
+    const updated = await userRepository.update(id, {
       ...data,
       name: data.name?.trim(),
     })
@@ -114,8 +114,8 @@ export const userService = {
     return updated
   },
 
-  delete(id: number): void {
-    const deleted = userRepository.softDelete(id)
+  async delete(id: number): Promise<void> {
+    const deleted = await userRepository.softDelete(id)
     if (!deleted) throw new NotFoundError(id)
   },
 }

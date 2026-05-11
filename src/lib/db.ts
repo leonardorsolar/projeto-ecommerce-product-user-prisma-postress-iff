@@ -4,10 +4,22 @@ import path from 'node:path'
 
 let db: Database.Database | null = null
 
+function resolveSqliteDbPath(): string {
+  const configuredPath = process.env.SQLITE_DB_PATH?.trim()
+
+  if (configuredPath) {
+    return path.isAbsolute(configuredPath)
+      ? configuredPath
+      : path.join(process.cwd(), configuredPath)
+  }
+
+  return path.join(process.cwd(), 'data', 'ecommerce.db')
+}
+
 export function getDb(): Database.Database {
   if (!db) {
-    const dataDir = path.join(process.cwd(), 'data')
-    const dbPath = path.join(dataDir, 'ecommerce.db')
+    const dbPath = resolveSqliteDbPath()
+    const dataDir = path.dirname(dbPath)
 
     fs.mkdirSync(dataDir, { recursive: true })
 

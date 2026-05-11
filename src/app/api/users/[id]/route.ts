@@ -17,7 +17,7 @@ function parseId(id: string): number {
 export async function GET(_: NextRequest, { params }: Params) {
   try {
     const { id } = await params
-    const user = userService.findById(parseId(id))
+    const user = await userService.findById(parseId(id))
     return ok(user)
   } catch (error) {
     if (error instanceof ValidationError) return badRequest(error.code, error.message, error.details)
@@ -30,7 +30,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
   try {
     const { id } = await params
     const body = await request.json()
-    const user = userService.update(parseId(id), body)
+    const user = await userService.update(parseId(id), body)
     return ok(user)
   } catch (error) {
     if (error instanceof ValidationError) return badRequest(error.code, error.message, error.details)
@@ -42,7 +42,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 export async function DELETE(_: NextRequest, { params }: Params) {
   try {
     const { id } = await params
-    userService.delete(parseId(id))
+    await userService.delete(parseId(id))
     return ok({ message: 'Usuário removido com sucesso' })
   } catch (error) {
     if (error instanceof ValidationError) return badRequest(error.code, error.message, error.details)
