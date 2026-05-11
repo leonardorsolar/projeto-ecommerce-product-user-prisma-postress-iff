@@ -1,44 +1,27 @@
-# Sistema de Gestão de Produtos para E-commerce
+# Sistema de Gestão de Produtos e Usuários para E-commerce
 
-Projeto full stack com **Next.js + TypeScript + Tailwind CSS + SQLite** para gerenciamento de produtos de um e-commerce.
+Projeto full stack com Next.js (App Router), TypeScript e Tailwind para gestão de produtos e usuários.
 
-## Objetivo
+## Visão geral
 
-Construir um CRUD completo de produtos com uma interface web simples e API integrada no próprio projeto.
+Este projeto usa arquitetura em camadas por módulo:
+
+- API Route → Service → Repository
+- validações de negócio no Service
+- acesso a dados apenas no Repository
+
+Além disso, agora há suporte híbrido de banco:
+
+- SQLite com `better-sqlite3` para desenvolvimento local
+- PostgreSQL com Prisma para produção (ou quando configurado)
 
 ## Stack
 
-- **Frontend:** Next.js + React + TypeScript
-- **Backend:** Next.js App Router + API Routes
-- **Estilização:** Tailwind CSS
-- **Banco de dados:** SQLite
-- **Acesso ao banco:** `better-sqlite3`
-
-## Estrutura atual
-
-```text
-src/
-├── app/
-│   ├── api/
-│   │   └── health/
-│   │       └── route.ts
-│   ├── globals.css
-│   ├── layout.tsx
-│   └── page.tsx
-├── components/
-│   ├── layout/
-│   └── ui/
-├── lib/
-│   ├── apiResponse.ts
-│   └── db.ts
-└── modules/
-    └── products/
-        ├── components/
-        ├── hooks/
-        ├── repository/
-        ├── services/
-        └── types/
-```
+- Frontend: Next.js + React + TypeScript
+- Backend: Next.js App Router + API Routes
+- Estilização: Tailwind CSS
+- Banco local: SQLite (`better-sqlite3`)
+- Banco produção: PostgreSQL + Prisma (`@prisma/client`)
 
 ## Pré-requisitos
 
@@ -51,39 +34,92 @@ src/
 npm install
 ```
 
-## Execução em desenvolvimento
+## Configuração de ambiente
+
+Use o arquivo `.env.example` como base.
+
+Variáveis principais:
+
+- `DATABASE_PROVIDER=sqlite|prisma`
+- `SQLITE_DB_PATH=data/ecommerce.db`
+- `DATABASE_URL=postgresql://...`
+
+Comportamento do provider:
+
+- Se `DATABASE_PROVIDER` estiver definido, ele é respeitado.
+- Se não estiver definido:
+  - em `production` usa `prisma`
+  - em outros ambientes usa `sqlite`
+
+## Execução em desenvolvimento (SQLite)
 
 ```bash
 npm run dev
 ```
 
-A aplicação ficará disponível em:
+Aplicação disponível em:
 
 ```text
 http://localhost:3000
 ```
 
+## Execução com PostgreSQL + Prisma
+
+1. Configure no `.env`:
+
+```dotenv
+DATABASE_PROVIDER=prisma
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ecommerce?schema=public
+```
+
+2. Gere o client Prisma:
+
+```bash
+npm run prisma:generate
+```
+
+3. Em ambiente de desenvolvimento com PostgreSQL, aplique migrations:
+
+```bash
+npm run prisma:migrate:dev
+```
+
+4. Em produção, aplique migrations com:
+
+```bash
+npm run prisma:migrate:deploy
+```
+
 ## Scripts disponíveis
 
 - `npm run dev` — inicia o servidor de desenvolvimento
+- `npm run clean` — remove a pasta `.next`
+- `npm run dev:clean` — limpa `.next` e sobe o servidor
 - `npm run build` — gera a build de produção
 - `npm run start` — inicia a aplicação em modo produção
-- `npm run lint` — executa o lint do projeto
+- `npm run lint` — executa o lint
+- `npm run prisma:generate` — gera o Prisma Client
+- `npm run prisma:migrate:dev` — cria/aplica migration em desenvolvimento
+- `npm run prisma:migrate:deploy` — aplica migrations em produção
 
 ## Banco de dados
 
-O projeto usa SQLite com arquivo local em `data/ecommerce.db`.
+### SQLite (local)
 
-A conexão é gerenciada em `src/lib/db.ts`, com:
-
-- criação automática da pasta `data/`
-- conexão singleton
+- caminho padrão: `data/ecommerce.db`
+- conexão singleton em `src/lib/db.ts`
+- inicialização automática de schema para tabelas `products` e `users`
 - `journal_mode = WAL`
-- criação automática da tabela `products`
+
+### PostgreSQL (produção)
+
+- schema Prisma em `prisma/schema.prisma`
+- configuração do Prisma 7 em `prisma.config.ts`
+- client Prisma compartilhado em `src/lib/prisma.ts`
 
 ## Health Check
 
-Endpoint disponível para validar a aplicação e a conexão com o banco:
+Endpoint:
 
 ```http
 GET /api/health
@@ -95,42 +131,58 @@ Exemplo de resposta:
 {
   "status": "ok",
   "database": "connected",
-  "timestamp": "2026-05-06T17:02:26.283Z"
+  "provider": "sqlite",
+  "timestamp": "2026-05-11T10:00:00.000Z"
 }
 ```
 
-Você pode testar no navegador ou no terminal:
+Teste rápido:
 
 ```bash
 curl http://localhost:3000/api/health
 ```
 
-## Status do projeto
+## Estrutura do projeto (resumo)
 
-### Sprint 1 — concluída
-
-- Base do projeto criada com Next.js + TypeScript + Tailwind
-- Estrutura modular inicial criada
-- SQLite configurado com `better-sqlite3`
-- Helpers de resposta HTTP criados
-- Rota de health check implementada
+```text
+src/
+├── app/
+│   ├── api/
+│   │   ├── health/
+│   │   ├── products/
+│   │   └── users/
+│   ├── products/
+│   └── users/
+├── components/
+├── lib/
+│   ├── apiResponse.ts
+│   ├── db.ts
+│   ├── databaseHealth.ts
+│   ├── databaseProvider.ts
+│   └── prisma.ts
+└── modules/
+    ├── products/
+    │   ├── components/
+    │   ├── hooks/
+    │   ├── repository/
+    │   │   └── providers/
+    │   ├── services/
+    │   └── types/
+    └── users/
+        ├── components/
+        ├── hooks/
+        ├── repository/
+        │   └── providers/
+        ├── services/
+        └── types/
+```
 
 ## Documentação
 
-A documentação do projeto está na pasta `doc/`:
+A documentação do projeto está na pasta `doc/`, incluindo:
 
 - `doc/geral/documento_geral.md`
 - `doc/spec/spec_cadastro_produto.md`
-- `doc/sprint/sprint_1.md`
-- `doc/sprint/sprint_2.md`
-- `doc/sprint/sprint_3.md`
-- `doc/sprint/sprint_4.md`
-
-## Próximos passos
-
-As próximas etapas previstas são:
-
-- implementar o CRUD backend de produtos
-- criar os tipos, repository e service do módulo `products`
-- adicionar páginas e componentes de frontend
-- incluir testes unitários
+- `doc/spec/spec_crud_usuarios.md`
+- `doc/testes/plano de teste.md`
+- `doc/sprint/`
