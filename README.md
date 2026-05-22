@@ -34,6 +34,9 @@ Além disso, agora há suporte híbrido de banco:
 npm install
 ```
 
+ver:
+http://localhost:3000/api/health
+
 ## Configuração de ambiente
 
 Use o arquivo `.env.example` como base.

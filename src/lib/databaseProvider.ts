@@ -12,6 +12,8 @@ function normalizeProvider(value: string | undefined): DatabaseProvider | null {
 }
 
 export function getDatabaseProvider(): DatabaseProvider {
+  console.log("process.env.DATABASE_PROVIDER")
+  console.log(process.env.DATABASE_PROVIDER)
   const configuredProvider = normalizeProvider(process.env.DATABASE_PROVIDER)
 
   if (configuredProvider) {
