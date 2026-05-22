@@ -15,20 +15,27 @@ function normalizeProvider(value: string | undefined): DatabaseProvider | null {
 }
 
 export function getDatabaseProvider(): DatabaseProvider {
+  const hasDatabaseUrl =
+    typeof process.env.DATABASE_URL === 'string' &&
+    process.env.DATABASE_URL.trim() !== ''
+
+  // Regra principal:
+  // - com DATABASE_URL => prisma (PostgreSQL)
+  // - sem DATABASE_URL => usa DATABASE_PROVIDER (quando válido)
+  // - fallback final => sqlite local
+  if (hasDatabaseUrl) {
+    return 'prisma'
+  }
+
   const configuredProvider = normalizeProvider(process.env.DATABASE_PROVIDER)
 
   if (configuredProvider) {
     return configuredProvider
   }
 
-  const hasDatabaseUrl =
-    typeof process.env.DATABASE_URL === 'string' &&
-    process.env.DATABASE_URL.trim() !== ''
-
   // Regra padrão:
   // - sem DATABASE_URL => sqlite local
-  // - com DATABASE_URL => prisma (PostgreSQL)
-  return hasDatabaseUrl ? 'prisma' : 'sqlite'
+  return 'sqlite'
 }
 
 export function isPrismaProvider(): boolean {

@@ -1,7 +1,18 @@
 import { isPrismaProvider } from '@/lib/databaseProvider'
-import { prismaUserRepository } from './providers/prismaUserRepository'
-import { sqliteUserRepository } from './providers/sqliteUserRepository'
+import type { UserRepository } from './userRepository.types'
 
-export const userRepository = isPrismaProvider()
-  ? prismaUserRepository
-  : sqliteUserRepository
+function loadUserRepository(): UserRepository {
+  if (isPrismaProvider()) {
+    const { prismaUserRepository } = require('./providers/prismaUserRepository') as
+      typeof import('./providers/prismaUserRepository')
+
+    return prismaUserRepository
+  }
+
+  const { sqliteUserRepository } = require('./providers/sqliteUserRepository') as
+    typeof import('./providers/sqliteUserRepository')
+
+  return sqliteUserRepository
+}
+
+export const userRepository = loadUserRepository()
