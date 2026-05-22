@@ -55,7 +55,7 @@ http://localhost:3000/api/health
 
 ## Entendendo a Configuração de ambiente
 
-arquivo `.env.example` como base.
+arquivo `.env.prod` como base.
 
 Variáveis principais:
 
@@ -75,7 +75,7 @@ SQLITE_DB_PATH=data/ecommerce.db
 
 ## Criar o arquivo .env (configuração de ambiente)
 
-Copie o arquivo `.env.example` para `.env` e ajuste os valores conforme seu ambiente.
+Copie o arquivo `.env.prod` para `.env` e ajuste os valores conforme seu ambiente.
 
 ```dotenv
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ecommerce?schema=public
