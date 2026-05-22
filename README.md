@@ -34,31 +34,6 @@ Além disso, agora há suporte híbrido de banco:
 npm install
 ```
 
-## criar o arquivo .env (Configuração de ambiente )
-
-Pegue o arquivo env.example e renomeio para .env
-
-ver:
-http://localhost:3000/api/health
-
-
-## Configuração de ambiente 
-
-Use o arquivo `.env.example` como base.
-
-Variáveis principais:
-
-- `DATABASE_PROVIDER=sqlite|prisma`
-- `SQLITE_DB_PATH=data/ecommerce.db`
-- `DATABASE_URL=postgresql://...`
-
-Comportamento do provider:
-
-- Se `DATABASE_PROVIDER` estiver definido, ele é respeitado.
-- Se não estiver definido:
-  - em `production` usa `prisma`
-  - em outros ambientes usa `sqlite`
-
 ## Execução em desenvolvimento (SQLite)
 
 ```bash
@@ -71,12 +46,38 @@ Aplicação disponível em:
 http://localhost:3000
 ```
 
+ver qual banco esta configurado:
+http://localhost:3000/api/health
+
+
+
+
+
+## Entendendo a Configuração de ambiente
+
+arquivo `.env.example` como base.
+
+Variáveis principais:
+
+com DATABASE_URL → prisma
+sem DATABASE_URL → sqlite
+
+# PostgreSQL (Prisma)
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ecommerce?schema=public
+
+# SQLite (usado quando não houver DATABASE_URL)
+SQLITE_DB_PATH=data/ecommerce.db
+
+
 ## Execução com PostgreSQL + Prisma
 
 1. Configure no `.env`:
 
+## Criar o arquivo .env (configuração de ambiente)
+
+Copie o arquivo `.env.example` para `.env` e ajuste os valores conforme seu ambiente.
+
 ```dotenv
-DATABASE_PROVIDER=prisma
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ecommerce?schema=public
 ```
 
@@ -109,6 +110,38 @@ npm run prisma:migrate:deploy
 - `npm run prisma:generate` — gera o Prisma Client
 - `npm run prisma:migrate:dev` — cria/aplica migration em desenvolvimento
 - `npm run prisma:migrate:deploy` — aplica migrations em produção
+
+## Fluxos rápidos de configuração
+
+### Rodar com SQLite local (sem PostgreSQL)
+
+Não precisa do .env
+
+```bash
+npm run dev
+```
+
+### Rodar com PostgreSQL + Prisma
+
+1. Defina `DATABASE_URL` no `.env`.
+2. (Opcional) defina `DATABASE_PROVIDER=prisma`.
+3. Gere o client Prisma:
+
+```bash
+npm run prisma:generate
+```
+
+4. Em desenvolvimento, aplique migrations:
+
+```bash
+npm run prisma:migrate:dev
+```
+
+5. Inicie a aplicação:
+
+```bash
+npm run dev
+```
 
 ## Banco de dados
 

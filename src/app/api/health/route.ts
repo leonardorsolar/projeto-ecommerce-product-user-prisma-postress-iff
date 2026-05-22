@@ -5,9 +5,7 @@ import { getDatabaseProvider } from '@/lib/databaseProvider'
 export async function GET() {
   try {
     await checkDatabaseConnection()
-
-    console.log('[Health Check] Conexão com o banco de dados bem-sucedida.')
-    console.log('[Health Check] Provedor de banco de dados:', getDatabaseProvider())
+    
 
     return NextResponse.json({
       status: 'ok',
