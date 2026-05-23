@@ -1,18 +1,57 @@
 import { isPrismaProvider } from '@/lib/databaseProvider'
 import type { ProductRepository } from './productRepository.types'
 
-function loadProductRepository(): ProductRepository {
-  if (isPrismaProvider()) {
-    const { prismaProductRepository } = require('./providers/prismaProductRepository') as
-      typeof import('./providers/prismaProductRepository')
+let cachedProductRepository: ProductRepository | null = null
 
-    return prismaProductRepository
+async function getProductRepository(): Promise<ProductRepository> {
+  if (cachedProductRepository) {
+    return cachedProductRepository
   }
 
-  const { sqliteProductRepository } = require('./providers/sqliteProductRepository') as
-    typeof import('./providers/sqliteProductRepository')
+  if (isPrismaProvider()) {
+    const module = await import('./providers/prismaProductRepository')
 
-  return sqliteProductRepository
+    if (!module.prismaProductRepository) {
+      throw new Error('Falha ao carregar prismaProductRepository')
+    }
+
+    cachedProductRepository = module.prismaProductRepository
+    return cachedProductRepository
+  }
+
+  const module = await import('./providers/sqliteProductRepository')
+
+  if (!module.sqliteProductRepository) {
+    throw new Error('Falha ao carregar sqliteProductRepository')
+  }
+
+  cachedProductRepository = module.sqliteProductRepository
+  return cachedProductRepository
 }
 
-export const productRepository = loadProductRepository()
+export const productRepository: ProductRepository = {
+  async findAll() {
+    const repository = await getProductRepository()
+    return repository.findAll()
+  },
+
+  async findById(id) {
+    const repository = await getProductRepository()
+    return repository.findById(id)
+  },
+
+  async create(data) {
+    const repository = await getProductRepository()
+    return repository.create(data)
+  },
+
+  async update(id, data) {
+    const repository = await getProductRepository()
+    return repository.update(id, data)
+  },
+
+  async delete(id) {
+    const repository = await getProductRepository()
+    return repository.delete(id)
+  },
+}

@@ -1,18 +1,62 @@
 import { isPrismaProvider } from '@/lib/databaseProvider'
 import type { UserRepository } from './userRepository.types'
 
-function loadUserRepository(): UserRepository {
-  if (isPrismaProvider()) {
-    const { prismaUserRepository } = require('./providers/prismaUserRepository') as
-      typeof import('./providers/prismaUserRepository')
+let cachedUserRepository: UserRepository | null = null
 
-    return prismaUserRepository
+async function getUserRepository(): Promise<UserRepository> {
+  if (cachedUserRepository) {
+    return cachedUserRepository
   }
 
-  const { sqliteUserRepository } = require('./providers/sqliteUserRepository') as
-    typeof import('./providers/sqliteUserRepository')
+  if (isPrismaProvider()) {
+    const module = await import('./providers/prismaUserRepository')
 
-  return sqliteUserRepository
+    if (!module.prismaUserRepository) {
+      throw new Error('Falha ao carregar prismaUserRepository')
+    }
+
+    cachedUserRepository = module.prismaUserRepository
+    return cachedUserRepository
+  }
+
+  const module = await import('./providers/sqliteUserRepository')
+
+  if (!module.sqliteUserRepository) {
+    throw new Error('Falha ao carregar sqliteUserRepository')
+  }
+
+  cachedUserRepository = module.sqliteUserRepository
+  return cachedUserRepository
 }
 
-export const userRepository = loadUserRepository()
+export const userRepository: UserRepository = {
+  async findAll() {
+    const repository = await getUserRepository()
+    return repository.findAll()
+  },
+
+  async findById(id) {
+    const repository = await getUserRepository()
+    return repository.findById(id)
+  },
+
+  async emailExists(email, excludeId) {
+    const repository = await getUserRepository()
+    return repository.emailExists(email, excludeId)
+  },
+
+  async create(data) {
+    const repository = await getUserRepository()
+    return repository.create(data)
+  },
+
+  async update(id, data) {
+    const repository = await getUserRepository()
+    return repository.update(id, data)
+  },
+
+  async softDelete(id) {
+    const repository = await getUserRepository()
+    return repository.softDelete(id)
+  },
+}
